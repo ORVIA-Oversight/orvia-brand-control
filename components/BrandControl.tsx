@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import {
   Activity, BarChart3, CheckCircle2, CircleAlert, FileImage, Globe2,
   Megaphone, Mic2, Palette, Plus, Share2, Sparkles, Video, WandSparkles,
-  Network, Settings2, ShieldCheck
+  Network, Settings2, ShieldCheck, ArrowUpRight, Layers3, Radio, Zap, Orbit
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -73,6 +73,40 @@ export function BrandControl({initialData}:{initialData:InitialData}){
           <div className="tabs"><button className={tab==='overview'?'active':''} onClick={()=>setTab('overview')}>Overview</button><button className={tab==='create'?'active':''} onClick={()=>setTab('create')}>Create</button><button className={tab==='analytics'?'active':''} onClick={()=>setTab('analytics')}>Analytics</button></div>
 
           {tab==='overview'&&<>
+            <section className="brandPulse">
+              <div className="pulseCopy">
+                <div className="pulseEyebrow"><span/>LIVE BRAND OPERATING SYSTEM</div>
+                <h2>One living brand across every ORVIA surface.</h2>
+                <p>IRIS routes the work. Brand Control keeps identity, voice, social, media and web output aligned before anything reaches the outside world.</p>
+                <div className="pulseActions">
+                  <button className="primaryPulse" onClick={()=>setTab('create')}><Sparkles size={16}/>Create with IRIS</button>
+                  <button className="secondaryPulse" onClick={()=>setView('Brand DNA')}>Open Brand DNA<ArrowUpRight size={15}/></button>
+                </div>
+                <div className="pulseStats">
+                  <div><b>{currentAssets.length}</b><span>controlled surfaces</span></div>
+                  <div><b>{initialData.work.length}</b><span>brand work items</span></div>
+                  <div><b>{initialData.integrations.filter(x=>ok(x.status)).length}</b><span>verified connections</span></div>
+                </div>
+              </div>
+              <div className="pulseVisual" aria-hidden="true">
+                <div className="orbitalCore">
+                  <i className="orbitRing ringOne"/><i className="orbitRing ringTwo"/><i className="orbitRing ringThree"/>
+                  <div className="orbitNode nodeOne"/><div className="orbitNode nodeTwo"/><div className="orbitNode nodeThree"/>
+                  <div className="orbitCentre"><Orbit size={26}/><strong>ORVIA</strong><small>BRAND CONTROL</small></div>
+                </div>
+                <div className="pulseBadge badgeOne"><Palette size={14}/><span>Brand DNA</span></div>
+                <div className="pulseBadge badgeTwo"><Share2 size={14}/><span>Social</span></div>
+                <div className="pulseBadge badgeThree"><Mic2 size={14}/><span>Voice</span></div>
+              </div>
+            </section>
+
+            <section className="quickActions">
+              <button onClick={()=>setTab('create')} className="quickCard qcNavy"><span className="quickIcon"><Zap size={19}/></span><div><small>START</small><b>New campaign</b><p>Give IRIS the outcome and let Brand Control build the governed pack.</p></div><ArrowUpRight size={16}/></button>
+              <button onClick={()=>setView('Socials')} className="quickCard qcPurple"><span className="quickIcon"><Share2 size={19}/></span><div><small>CHANNELS</small><b>Social studio</b><p>Plan, approve, publish and measure every approved social output.</p></div><ArrowUpRight size={16}/></button>
+              <button onClick={()=>setView('Media')} className="quickCard qcGold"><span className="quickIcon"><Video size={19}/></span><div><small>PRODUCTION</small><b>Media lab</b><p>Control HeyGen, Synthesia, Canva and approved creative production.</p></div><ArrowUpRight size={16}/></button>
+              <button onClick={()=>setView('Websites')} className="quickCard qcTeal"><span className="quickIcon"><Layers3 size={19}/></span><div><small>ESTATE</small><b>Web & assets</b><p>Keep headers, footers, favicons, OG images and product identity aligned.</p></div><ArrowUpRight size={16}/></button>
+            </section>
+
             <section className="statusCard">
               <div className="healthRing" style={{'--health':`${health*3.6}deg`} as React.CSSProperties}><span>{health}%</span></div>
               <div><h2>{initialData.connected?(reviewAssets.length?'Brand health needs attention':'Brand estate is aligned'):'Fresh platform is live'}</h2><p>{initialData.connected?`${currentAssets.length} controlled surfaces · ${reviewAssets.length} require reconciliation or verification`:'Connect Supabase and IRIS next. No synthetic data is being displayed.'}</p></div>
@@ -86,7 +120,10 @@ export function BrandControl({initialData}:{initialData:InitialData}){
               </div>
             </section>
 
-            <section className="networkGrid"><NetworkPanel title="Social" subtitle="Publishing & analytics" icon={<Share2 size={17}/>} rows={socials}/><NetworkPanel title="Media" subtitle="Generation & production" icon={<Video size={17}/>} rows={media}/><NetworkPanel title="Voice" subtitle="ARIA & telephony" icon={<Mic2 size={17}/>} rows={voice}/></section>
+            <section className="networkSection">
+              <div className="networkHeading"><div><small>LIVE TOOLING</small><h2>Connected brand systems</h2></div><div className="networkMeta"><Radio size={15}/>{initialData.integrations.filter(x=>ok(x.status)).length} verified</div></div>
+              <section className="networkGrid"><NetworkPanel title="Social" subtitle="Publishing & analytics" icon={<Share2 size={18}/>} rows={socials}/><NetworkPanel title="Media" subtitle="Generation & production" icon={<Video size={18}/>} rows={media}/><NetworkPanel title="Voice" subtitle="ARIA & telephony" icon={<Mic2 size={18}/>} rows={voice}/></section>
+            </section>
           </>}
 
           {tab==='create'&&<section className="focusPanel"><div className="focusIcon"><WandSparkles/></div><small>CREATE WITH IRIS</small><h2>Start with the outcome, not the tool.</h2><p>Describe what ORVIA needs to communicate or change. Brand Control attaches the approved identity, brand rules, evidence requirements, channels and approval gate before production.</p><textarea value={brief} onChange={e=>setBrief(e.target.value)} placeholder="Example: Prepare a Witness Room launch pack for the website, LinkedIn, Facebook, two 10-second videos and Voice briefing."/><button onClick={submitBrief}><Sparkles size={16}/>Build controlled brief</button>{submitState&&<div className="submitState">{submitState}</div>}</section>}
