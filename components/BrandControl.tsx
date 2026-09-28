@@ -4,7 +4,9 @@ import { useMemo, useState } from 'react';
 import {
   Activity, BarChart3, CheckCircle2, CircleAlert, FileImage, Globe2,
   Megaphone, Mic2, Palette, Plus, Share2, Sparkles, Video, WandSparkles,
-  Network, Settings2, ShieldCheck, ArrowUpRight, Layers3, Radio, Zap, Orbit
+  Network, Settings2, ShieldCheck, ArrowUpRight, Layers3, Radio, Zap, Orbit,
+  LayoutTemplate, Boxes, Rocket, Search, Link2, ScanSearch, History, ExternalLink,
+  MonitorCheck, ShieldAlert, FileCode2
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -129,7 +131,7 @@ export function BrandControl({initialData}:{initialData:InitialData}){
           {tab==='create'&&<section className="focusPanel"><div className="focusIcon"><WandSparkles/></div><small>CREATE WITH IRIS</small><h2>Start with the outcome, not the tool.</h2><p>Describe what ORVIA needs to communicate or change. Brand Control attaches the approved identity, brand rules, evidence requirements, channels and approval gate before production.</p><textarea value={brief} onChange={e=>setBrief(e.target.value)} placeholder="Example: Prepare a Witness Room launch pack for the website, LinkedIn, Facebook, two 10-second videos and Voice briefing."/><button onClick={submitBrief}><Sparkles size={16}/>Build controlled brief</button>{submitState&&<div className="submitState">{submitState}</div>}</section>}
 
           {tab==='analytics'&&<section className="focusPanel"><div className="focusIcon"><BarChart3/></div><small>REAL DATA ONLY</small><h2>Analytics populate only from verified connections.</h2><p>Brand Control does not invent followers, reach, conversions or campaign performance.</p><div className="stats"><div><b>{socials.filter(x=>ok(x.status)).length}</b><span>verified social connections</span></div><div><b>{reviewAssets.length}</b><span>estate exceptions</span></div><div><b>{initialData.work.filter(x=>x.approval_required).length}</b><span>approval-gated items</span></div></div></section>}
-        </>:<SectionView view={view} assets={initialData.assets} integrations={initialData.integrations}/>}
+        </>:view==='Websites'?<WebsiteControl assets={initialData.assets} connected={initialData.connected} onCreateBrief={()=>{setView('Overview');setTab('create')}}/>:<SectionView view={view} assets={initialData.assets} integrations={initialData.integrations}/>}
       </section>
     </main>
   </div>
@@ -138,6 +140,78 @@ export function BrandControl({initialData}:{initialData:InitialData}){
 function Column({title,tone,items}:{title:string;tone:string;items:WorkItem[]}){return <div className={`column ${tone}`}><header><span/>{title}<b>{items.length}</b></header><div>{items.length?items.map(x=><WorkCard key={x.id} item={x}/>):<div className="emptyCard"><Sparkles size={20}/><b>No items</b><span>IRIS-routed work will appear here.</span></div>}</div></div>}
 function WorkCard({item}:{item:WorkItem}){return <article className="workCard"><div className="workMeta"><span>{item.work_type.replaceAll('_',' ')}</span>{item.approval_required&&<span className="approval">approval</span>}</div><h4>{item.title}</h4><p>{item.detail||'Routed by IRIS to Brand Control.'}</p><footer><span>{item.priority}</span><span>{item.source_system||'IRIS'}</span></footer></article>}
 function NetworkPanel({title,subtitle,icon,rows}:{title:string;subtitle:string;icon:React.ReactNode;rows:Integration[]}){return <article className="networkPanel"><div className="sectionTitle">{icon}<span><b>{title}</b><small>{subtitle}</small></span></div><div className="chips">{rows.length?rows.map(r=><div className="chip" key={r.code}><span className={ok(r.status)?'dot ready':'dot'}/><div><b>{r.name}</b><small>{String(r.status||'NOT VERIFIED').replaceAll('_',' ')}</small></div></div>):<div className="chip"><span className="dot"/><div><b>{title} tools</b><small>NOT CONNECTED</small></div></div>}</div></article>}
+
+
+type WebsiteTab='Overview'|'Estate'|'Templates'|'Components'|'Deployments'|'SEO / OG'|'Compliance'|'Issues'|'Change History';
+
+function WebsiteControl({assets,connected,onCreateBrief}:{assets:Asset[];connected:boolean;onCreateBrief:()=>void}){
+  const [webTab,setWebTab]=useState<WebsiteTab>('Overview');
+  const websites=assets.filter(a=>Boolean(a.canonical_domain)||/website|site|web/i.test(String(a.asset_type||'')));
+  const verified=websites.filter(a=>ok(a.verification_status));
+  const exceptions=websites.filter(a=>!ok(a.verification_status));
+  const tabs:WebsiteTab[]=['Overview','Estate','Templates','Components','Deployments','SEO / OG','Compliance','Issues','Change History'];
+  const templateClasses=['PUBLIC CORPORATE','PRODUCT SITE','SERVICE PAGE','CAMPAIGN LANDING PAGE','CASE STUDY','INSIGHT / ARTICLE','ACADEMY','PORTAL / LOGIN','CLIENT SITE','MICROSITE'];
+  const runtimeComponents=['OrviaUtilityBar','OrviaHeader','OrviaHero','OrviaTrustStrip','OrviaMethod','OrviaCaseStudies','OrviaSocialFeed','OrviaArmedForcesPanel','OrviaPractitionerPanel','OrviaRelatedProducts','OrviaContact','OrviaFooter'];
+
+  return <section className="websiteControl">
+    <div className="websiteHero">
+      <div>
+        <div className="siteEyebrow"><Globe2 size={14}/>ORVIA WEBSITE LAYER</div>
+        <h2>One brand. One website system. Many products.</h2>
+        <p>Brand Control owns the approved identity, presentation and website rules. The ORVIA Web Runtime implements them across the estate; IRIS remains the conductor.</p>
+        <div className="siteHeroActions"><button onClick={onCreateBrief}><Sparkles size={16}/>Create website brief</button><span className={connected?'siteLive connected':'siteLive'}><i/>{connected?'Live registry connected':'Registry connection pending'}</span></div>
+      </div>
+      <div className="siteRuntimeCard">
+        <small>CONTROL CHAIN</small>
+        <div><b>Brand Control</b><span>Policy & approved content</span></div>
+        <i>↓</i>
+        <div><b>ORVIA Web Runtime</b><span>Components & templates</span></div>
+        <i>↓</i>
+        <div><b>GitHub · Vercel · Live Site</b><span>Deploy & verify</span></div>
+      </div>
+    </div>
+
+    <div className="websiteTabs">{tabs.map(t=><button key={t} className={webTab===t?'active':''} onClick={()=>setWebTab(t)}>{t}</button>)}</div>
+
+    {webTab==='Overview'&&<>
+      <div className="siteMetricGrid">
+        <Metric icon={<Globe2 size={18}/>} label="Registered sites" value={websites.length} note={connected?'Verified registry data':'Connect registry to populate'}/>
+        <Metric icon={<MonitorCheck size={18}/>} label="Verified" value={verified.length} note="Current verification state"/>
+        <Metric icon={<ShieldAlert size={18}/>} label="Needs attention" value={exceptions.length} note="Unverified or exception state"/>
+        <Metric icon={<Boxes size={18}/>} label="Runtime components" value={runtimeComponents.length} note="Defined target component set"/>
+      </div>
+      <div className="siteOverviewGrid">
+        <article className="sitePanel estatePanel"><PanelHead icon={<Globe2 size={17}/>} eyebrow="ESTATE" title="Website register"/><div className="estateRows">{websites.length?websites.slice(0,8).map(site=><WebsiteRow key={site.asset_key} site={site}/>):<EmptyModule icon={<Globe2/>} title="No website records connected" body="When the Brand Control registry is connected, verified ORVIA domains will appear here."/ >}</div></article>
+        <article className="sitePanel"><PanelHead icon={<Boxes size={17}/>} eyebrow="RUNTIME" title="Shared component control"/><div className="runtimeList">{runtimeComponents.slice(0,7).map(name=><div key={name}><span className="runtimeIcon"><FileCode2 size={14}/></span><b>{name}</b><small>Pending runtime registration</small></div>)}</div></article>
+      </div>
+      <div className="siteOverviewGrid lower">
+        <article className="sitePanel"><PanelHead icon={<LayoutTemplate size={17}/>} eyebrow="TEMPLATES" title="Approved structure library"/><div className="templateCloud">{templateClasses.slice(0,6).map(t=><span key={t}>{t}</span>)}</div><p className="panelNote">Template classes are defined; live template versions will appear only after runtime registration.</p></article>
+        <article className="sitePanel"><PanelHead icon={<ScanSearch size={17}/>} eyebrow="COMPLIANCE" title="What Brand Control checks"/><div className="checkGrid">{['Logo / favicon','Header / footer','Contact data','Company & ICO','SEO / canonical','Open Graph','Social links','Legacy wording'].map(x=><span key={x}><ShieldCheck size={13}/>{x}</span>)}</div></article>
+      </div>
+    </>}
+
+    {webTab==='Estate'&&<section className="sitePanel full"><PanelHead icon={<Globe2 size={17}/>} eyebrow="LIVE ESTATE" title="Registered ORVIA websites"/>{websites.length?<div className="estateTable"><div className="estateHeader"><span>Site</span><span>Domain</span><span>Status</span><span>Verification</span></div>{websites.map(site=><div className="estateTableRow" key={site.asset_key}><b>{site.display_name}</b><span>{site.canonical_domain||'No canonical domain'}</span><span>{String(site.estate_disposition||'UNSET').toUpperCase()}</span><span className={ok(site.verification_status)?'verifiedText':'pendingText'}>{String(site.verification_status||'NOT VERIFIED').replaceAll('_',' ')}</span></div>)}</div>:<EmptyModule icon={<Globe2/>} title="Estate register not connected yet" body="No website records are being invented. Connect the ORVIA Asset Registry / Website Registry to populate this view."/>}</section>}
+
+    {webTab==='Templates'&&<section className="sitePanel full"><PanelHead icon={<LayoutTemplate size={17}/>} eyebrow="ORVIA WEB RUNTIME" title="Website template classes"/><div className="templateGrid">{templateClasses.map(t=><div key={t}><span><LayoutTemplate size={17}/></span><b>{t}</b><small>Defined · version not yet registered</small></div>)}</div></section>}
+
+    {webTab==='Components'&&<section className="sitePanel full"><PanelHead icon={<Boxes size={17}/>} eyebrow="SHARED RUNTIME" title="Controlled components"/><div className="componentGrid">{runtimeComponents.map(name=><div key={name}><span><FileCode2 size={16}/></span><div><b>{name}</b><small>Brand Manifest consumer · registration pending</small></div></div>)}</div></section>}
+
+    {webTab==='Deployments'&&<section className="sitePanel full"><PanelHead icon={<Rocket size={17}/>} eyebrow="DEPLOYMENT CONTROL" title="GitHub → Vercel → Live verification"/><EmptyModule icon={<Rocket/>} title="Deployment registry not connected" body="Deployment history will show previous commit, new commit, deployment ID, verification result and rollback point when the Website Layer deployment feed is connected."/></section>}
+
+    {webTab==='SEO / OG'&&<section className="sitePanel full"><PanelHead icon={<Search size={17}/>} eyebrow="DISCOVERY" title="SEO & social preview control"/><div className="seoGrid">{['Title format','Meta descriptions','Canonical URLs','Open Graph images','Social card crop','Structured data','Internal linking','Sitemap / robots','Image alt rules','GSC integration'].map(x=><div key={x}><Search size={15}/><b>{x}</b><small>Controlled by Brand Manifest / Website Layer</small></div>)}</div></section>}
+
+    {webTab==='Compliance'&&<section className="sitePanel full"><PanelHead icon={<ScanSearch size={17}/>} eyebrow="VERIFY" title="Live website compliance"/><div className="complianceHero"><div><b>{exceptions.length}</b><span>current registry exceptions</span></div><p>{connected?'Only records currently marked unverified or outside KEEP are counted here. Full page-level scanning is not connected yet.':'Connect the Website Registry before compliance counts can be treated as live.'}</p></div><div className="checkGrid large">{['Site reachable','Correct logo','Correct favicon','Header version','Footer version','Phone / email','Company number','ICO','Armed Forces status','Social links','Page title','Meta description','Canonical URL','OG image','Product identity','Broken links','Accessibility','Legacy wording','Old domains','Unsupported claims'].map(x=><span key={x}><ShieldCheck size={13}/>{x}</span>)}</div></section>}
+
+    {webTab==='Issues'&&<section className="sitePanel full"><PanelHead icon={<CircleAlert size={17}/>} eyebrow="IRIS WORK" title="Website issues"/>{exceptions.length?<div className="issueList">{exceptions.map(x=><div key={x.asset_key}><CircleAlert size={16}/><div><b>{x.display_name}</b><span>{x.canonical_domain||x.asset_type||'Website'} · {String(x.verification_status||'NOT VERIFIED')}</span></div></div>)}</div>:<EmptyModule icon={<ShieldCheck/>} title={connected?'No registry-level website issues':'Issue feed not connected'} body={connected?'No currently registered website assets are marked as exceptions.':'IRIS-created website issues will appear here once Brand Control data is connected.'}/>}</section>}
+
+    {webTab==='Change History'&&<section className="sitePanel full"><PanelHead icon={<History size={17}/>} eyebrow="AUDIT TRAIL" title="Website change history"/><EmptyModule icon={<History/>} title="No deployment history connected" body="This view will preserve previous commit, new commit, authority level, approval, deployment, live verification and rollback point."/></section>}
+  </section>
+}
+
+function Metric({icon,label,value,note}:{icon:React.ReactNode;label:string;value:number;note:string}){return <article className="siteMetric"><span>{icon}</span><div><small>{label}</small><b>{value}</b><p>{note}</p></div></article>}
+function PanelHead({icon,eyebrow,title}:{icon:React.ReactNode;eyebrow:string;title:string}){return <div className="sitePanelHead"><span>{icon}</span><div><small>{eyebrow}</small><h3>{title}</h3></div></div>}
+function WebsiteRow({site}:{site:Asset}){return <div className="websiteRow"><div className="siteInitial">{site.display_name.slice(0,1).toUpperCase()}</div><div><b>{site.display_name}</b><span>{site.canonical_domain||site.asset_type||'Website'}</span></div><span className={ok(site.verification_status)?'siteState good':'siteState'}>{String(site.verification_status||'NOT VERIFIED').replaceAll('_',' ')}</span>{site.canonical_url&&<a href={site.canonical_url} target="_blank" rel="noreferrer" aria-label={`Open ${site.display_name}`}><ExternalLink size={14}/></a>}</div>}
+function EmptyModule({icon,title,body}:{icon:React.ReactNode;title:string;body:string}){return <div className="emptyModule"><span>{icon}</span><b>{title}</b><p>{body}</p></div>}
 
 function SectionView({view,assets,integrations}:{view:View;assets:Asset[];integrations:Integration[]}){
   const copy:Record<View,{title:string;body:string}>={
