@@ -18,13 +18,16 @@ export async function POST(req:NextRequest){
   const buzz=body?.buzz||body?.signal||null;
   const detail=clean(`${instruction}${buzz?` | Signal: ${JSON.stringify(buzz)}`:''}`);
   const approvalRequired=body?.approval_required!==false;
+  const requestedAgent=clean(body?.target_agent);
+  const assignedTo=['BRAND-01','IT-01','SALES-01'].includes(requestedAgent)?requestedAgent:'BRAND-01';
+  const workType=clean(body?.work_type)||'brand_control_instruction';
   const insert=await supabase.from('admin_work_queue').insert({
-    work_type:'brand_control_instruction',
+    work_type:workType,
     title:instruction.slice(0,180),
     detail,
     status:'open',
     priority:clean(body?.priority)||'normal',
-    assigned_to:'BRAND-01',
+    assigned_to:assignedTo,
     approval_required:approvalRequired,
     source_system:'IRIS',
     source_reference:clean(body?.source_reference)||'brand-control-api'
