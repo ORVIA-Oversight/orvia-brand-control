@@ -6,6 +6,7 @@ import {
   Megaphone, Mic2, Palette, Plus, Share2, Sparkles, Video, WandSparkles,
   Network, Settings2, ShieldCheck
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 type WorkItem={id:string;work_type:string;title:string;detail?:string|null;status:string;priority:string;approval_required:boolean;source_system?:string|null;source_reference?:string|null;created_at:string};
 type Asset={asset_key:string;display_name:string;asset_type?:string|null;canonical_domain?:string|null;canonical_url?:string|null;estate_disposition?:string|null;verification_status?:string|null};
@@ -14,7 +15,7 @@ type InitialData={connected:boolean;work:WorkItem[];assets:Asset[];integrations:
 
 type View='Overview'|'Brand DNA'|'Socials'|'Media'|'Voice'|'Websites'|'Assets'|'Campaigns'|'Integrations'|'Settings';
 
-const views:[View,React.ComponentType<{size?:number}>][]=[
+const views:[View,LucideIcon][]=[
   ['Overview',Activity],['Brand DNA',Palette],['Socials',Share2],['Media',Video],['Voice',Mic2],['Websites',Globe2],['Assets',FileImage],['Campaigns',Megaphone],['Integrations',Network],['Settings',Settings2]
 ];
 
