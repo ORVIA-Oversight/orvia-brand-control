@@ -103,3 +103,48 @@ linear-gradient(135deg,#0B2450 0%,#153A72 45%,#2B929D 120%);box-shadow:0 18px 50
 
 @media(max-width:1180px){.websiteHero{grid-template-columns:1fr}.siteMetricGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.siteOverviewGrid,.siteOverviewGrid.lower{grid-template-columns:1fr}.templateGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.checkGrid.large{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.siteMetricGrid,.templateGrid,.componentGrid,.seoGrid,.checkGrid,.checkGrid.large{grid-template-columns:1fr}.estateHeader{display:none}.estateTableRow{grid-template-columns:1fr}.websiteHero{padding:18px}.websiteHero h2{font-size:26px}}
+
+
+/* ORVIA UNIFIED INTERNAL INTERFACE — canonical shell */
+:root{
+  --orvia-navy:#0B2450;
+  --orvia-teal:#2B929D;
+  --orvia-gold:#EAAA00;
+  --orvia-purple:#82418F;
+  --orvia-orange:#E74612;
+  --orvia-warm:#FAF7F2;
+  --orvia-ink:#10213E;
+  --orvia-line:rgba(11,36,80,.16);
+  --orvia-grid:rgba(11,36,80,.032);
+  --orvia-radius-sm:12px;
+  --orvia-radius-md:18px;
+  --orvia-radius-lg:26px;
+  --orvia-shadow:0 12px 32px rgba(11,36,80,.07);
+}
+.workspace{
+  background:
+    linear-gradient(var(--orvia-grid) 1px,transparent 1px),
+    linear-gradient(90deg,var(--orvia-grid) 1px,transparent 1px),
+    radial-gradient(circle at 84% -5%,rgba(234,170,0,.12),transparent 27%),
+    radial-gradient(circle at 100% 20%,rgba(130,65,143,.09),transparent 28%),
+    radial-gradient(circle at 10% 7%,rgba(43,146,157,.09),transparent 24%),
+    linear-gradient(135deg,#FBFAF7 0%,#F8FBFC 48%,#FAF7F2 100%);
+  background-size:28px 28px,28px 28px,auto,auto,auto,auto;
+}
+.officialLogo{padding:8px 5px 20px}
+.officialLogo img{display:block;width:100%;height:auto;object-fit:contain}
+.orbitMark{display:none}
+.statusCard,.boardWrap,.networkSection,.sitePanel,.siteMetric,.focusPanel,.quickCard,.networkPanel{
+  border:1.5px solid var(--orvia-line);
+  box-shadow:var(--orvia-shadow);
+}
+.statusCard{border-left:4px solid var(--orvia-gold)}
+.boardWrap{border-top:3px solid var(--orvia-navy)}
+.networkSection{border-top:3px solid var(--orvia-teal)}
+.focusPanel{border-top:3px solid var(--orvia-purple)}
+.sitePanel{position:relative;overflow:hidden}
+.sitePanel:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(var(--orvia-navy),var(--orvia-teal),var(--orvia-gold),var(--orvia-purple),var(--orvia-orange))}
+.siteMetric:nth-child(1){border-top:3px solid var(--orvia-navy)}
+.siteMetric:nth-child(2){border-top:3px solid var(--orvia-teal)}
+.siteMetric:nth-child(3){border-top:3px solid var(--orvia-orange)}
+.siteMetric:nth-child(4){border-top:3px solid var(--orvia-purple)}
