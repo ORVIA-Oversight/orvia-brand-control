@@ -147,11 +147,28 @@ type WebsiteTab='Overview'|'Estate'|'Templates'|'Components'|'Deployments'|'SEO 
 
 function WebsiteControl({assets,webProjects,connected,onCreateBrief}:{assets:Asset[];webProjects:WebProject[];connected:boolean;onCreateBrief:()=>void}){
   const [webTab,setWebTab]=useState<WebsiteTab>('Overview');
+  const [siteAction,setSiteAction]=useState('');
   const websites=assets.filter(a=>Boolean(a.canonical_domain)||/website|site|web/i.test(String(a.asset_type||'')));
   const projectRows=webProjects.filter(p=>p.project_code!=='ORVIA-HEALTHCARE-LEGACY'&&p.project_code!=='ORVIA-WORKSPACE-TEMP');
   const verified=websites.filter(a=>ok(a.verification_status));
   const exceptions=websites.filter(a=>!ok(a.verification_status));
   const tabs:WebsiteTab[]=['Overview','Estate','Templates','Components','Deployments','SEO / OG','Compliance','Issues','Change History'];
+
+  async function requestWebsiteChange(site:WebProject){
+    const instruction=window.prompt(`What do you want changed on ${site.project_code}?`);
+    if(!instruction?.trim())return;
+    setSiteAction(`Sending ${site.project_code} change to IRIS…`);
+    const r=await fetch('/api/iris/intake',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({
+      instruction:`Website change for ${site.project_code} (${site.domain||site.live_url||site.github_repo||'site'}): ${instruction.trim()}`,
+      target_agent:'IT-01',
+      work_type:'website_change',
+      approval_required:true,
+      priority:'normal',
+      source_reference:`brand-control-websites:${site.project_code}`
+    })});
+    const data=await r.json().catch(()=>({}));
+    setSiteAction(r.ok?`Queued via IRIS to IT-01: ${data?.work?.id||site.project_code}`:(data?.reason||'Could not queue website change.'));
+  }
   const templateClasses=['PUBLIC CORPORATE','PRODUCT SITE','SERVICE PAGE','CAMPAIGN LANDING PAGE','CASE STUDY','INSIGHT / ARTICLE','ACADEMY','PORTAL / LOGIN','CLIENT SITE','MICROSITE'];
   const runtimeComponents=['OrviaUtilityBar','OrviaHeader','OrviaHero','OrviaTrustStrip','OrviaMethod','OrviaCaseStudies','OrviaSocialFeed','OrviaArmedForcesPanel','OrviaPractitionerPanel','OrviaRelatedProducts','OrviaContact','OrviaFooter'];
 
@@ -183,7 +200,7 @@ function WebsiteControl({assets,webProjects,connected,onCreateBrief}:{assets:Ass
         <Metric icon={<Boxes size={18}/>} label="Runtime components" value={runtimeComponents.length} note="Defined target component set"/>
       </div>
       <div className="siteOverviewGrid">
-        <article className="sitePanel estatePanel"><PanelHead icon={<Globe2 size={17}/>} eyebrow="ESTATE" title="Website register"/><div className="estateRows">{projectRows.length?projectRows.slice(0,10).map(site=><WebProjectRow key={site.project_code} site={site}/>):websites.length?websites.slice(0,8).map(site=><WebsiteRow key={site.asset_key} site={site}/>):<EmptyModule icon={<Globe2/>} title="No website records connected" body="When the Brand Control registry is connected, verified ORVIA domains will appear here."/>}</div></article>
+        <article className="sitePanel estatePanel"><PanelHead icon={<Globe2 size={17}/>} eyebrow="ESTATE" title="Website register"/><div className="estateRows">{projectRows.length?projectRows.slice(0,10).map(site=><WebProjectRow key={site.project_code} site={site} onEdit={requestWebsiteChange}/>):websites.length?websites.slice(0,8).map(site=><WebsiteRow key={site.asset_key} site={site}/>):<EmptyModule icon={<Globe2/>} title="No website records connected" body="When the Brand Control registry is connected, verified ORVIA domains will appear here."/>}</div>{siteAction&&<div className="submitState">{siteAction}</div>}</article>
         <article className="sitePanel"><PanelHead icon={<Boxes size={17}/>} eyebrow="RUNTIME" title="Shared component control"/><div className="runtimeList">{runtimeComponents.slice(0,7).map(name=><div key={name}><span className="runtimeIcon"><FileCode2 size={14}/></span><b>{name}</b><small>Pending runtime registration</small></div>)}</div></article>
       </div>
       <div className="siteOverviewGrid lower">
@@ -212,7 +229,7 @@ function WebsiteControl({assets,webProjects,connected,onCreateBrief}:{assets:Ass
 
 function Metric({icon,label,value,note}:{icon:React.ReactNode;label:string;value:number;note:string}){return <article className="siteMetric"><span>{icon}</span><div><small>{label}</small><b>{value}</b><p>{note}</p></div></article>}
 function PanelHead({icon,eyebrow,title}:{icon:React.ReactNode;eyebrow:string;title:string}){return <div className="sitePanelHead"><span>{icon}</span><div><small>{eyebrow}</small><h3>{title}</h3></div></div>}
-function WebProjectRow({site}:{site:WebProject}){return <div className="websiteRow"><div className="siteInitial">{site.project_code.slice(0,1).toUpperCase()}</div><div><b>{site.project_code}</b><span>{site.domain||'No domain'} · {site.github_repo||'Repo not mapped'} · {site.deployment_project||'Vercel not mapped'}</span></div><span className={site.rag_status==='GREEN'?'siteState good':'siteState'}>{site.rag_status||'UNASSESSED'} · {Math.round(Number(site.completion_percent||0))}%</span>{(site.live_url||site.preview_url)&&<a href={site.live_url||site.preview_url||'#'} target="_blank" rel="noreferrer"><ExternalLink size={14}/></a>}</div>}
+function WebProjectRow({site,onEdit}:{site:WebProject;onEdit:(site:WebProject)=>void}){return <div className="websiteRow"><div className="siteInitial">{site.project_code.slice(0,1).toUpperCase()}</div><div><b>{site.project_code}</b><span>{site.domain||'No domain'} · {site.github_repo||'Repo not mapped'} · {site.deployment_project||'Vercel not mapped'}</span></div><button className="siteState" onClick={()=>onEdit(site)}>EDIT VIA IRIS</button>{(site.live_url||site.preview_url)&&<a href={site.live_url||site.preview_url||'#'} target="_blank" rel="noreferrer"><ExternalLink size={14}/></a>}</div>}
 
 function WebsiteRow({site}:{site:Asset}){return <div className="websiteRow"><div className="siteInitial">{site.display_name.slice(0,1).toUpperCase()}</div><div><b>{site.display_name}</b><span>{site.canonical_domain||site.asset_type||'Website'}</span></div><span className={ok(site.verification_status)?'siteState good':'siteState'}>{String(site.verification_status||'NOT VERIFIED').replaceAll('_',' ')}</span>{site.canonical_url&&<a href={site.canonical_url} target="_blank" rel="noreferrer" aria-label={`Open ${site.display_name}`}><ExternalLink size={14}/></a>}</div>}
 function EmptyModule({icon,title,body}:{icon:React.ReactNode;title:string;body:string}){return <div className="emptyModule"><span>{icon}</span><b>{title}</b><p>{body}</p></div>}
