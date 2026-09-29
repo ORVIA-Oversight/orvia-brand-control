@@ -16,10 +16,10 @@ type Integration={code:string;name:string;category?:string|null;connection_mode?
 type WebProject={project_code:string;domain?:string|null;preview_url?:string|null;live_url?:string|null;github_repo?:string|null;deployment_project?:string|null;state?:string|null;completion_percent?:number|string|null;rag_status?:string|null;critical_blocker_count?:number|null;last_assessed_at?:string|null};
 type InitialData={connected:boolean;work:WorkItem[];assets:Asset[];integrations:Integration[];webProjects:WebProject[]};
 
-type View='Overview'|'Brand DNA'|'Socials'|'Media'|'Voice'|'Websites'|'Assets'|'Campaigns'|'Integrations'|'Settings';
+type View='Overview'|'Brand DNA'|'SEO'|'Socials'|'Media'|'Voice'|'Websites'|'Assets'|'Campaigns'|'Integrations'|'Settings';
 
 const views:[View,LucideIcon][]=[
-  ['Overview',Activity],['Brand DNA',Palette],['Socials',Share2],['Media',Video],['Voice',Mic2],['Websites',Globe2],['Assets',FileImage],['Campaigns',Megaphone],['Integrations',Network],['Settings',Settings2]
+  ['Overview',Activity],['Brand DNA',Palette],['SEO',Search],['Socials',Share2],['Media',Video],['Voice',Mic2],['Websites',Globe2],['Assets',FileImage],['Campaigns',Megaphone],['Integrations',Network],['Settings',Settings2]
 ];
 
 function norm(v:unknown){return String(v??'').toLowerCase().replaceAll('_',' ')}
@@ -238,6 +238,7 @@ function SectionView({view,assets,integrations}:{view:View;assets:Asset[];integr
   const copy:Record<View,{title:string;body:string}>={
     'Overview':{title:'Overview',body:''},
     'Brand DNA':{title:'Master brand system',body:'Logos, colours, typography, writing rules, approved descriptions, claims, CTAs, legal wording and product identities live here.'},
+    'SEO':{title:'Search & AI discovery',body:'SEO-01 runs a governed daily review across the registered estate. It monitors technical SEO, search performance, keyword and industry opportunities, internal linking, structured data, commercial intent and AI-search discoverability. IRIS remains the conductor and material changes stay approval-gated.'},
     'Socials':{title:'Social operating centre',body:'Connected accounts, content calendar, drafts, approvals, scheduled posts, published content, replies and performance.'},
     'Media':{title:'Media production',body:'HeyGen, Synthesia, Canva, visual prompts, approved presenters, video templates and generated-asset provenance.'},
     'Voice':{title:'Voice & ARIA',body:'Voice profiles, greetings, pronunciation, scripts, escalation wording, contact routes and approved conversational tone.'},
