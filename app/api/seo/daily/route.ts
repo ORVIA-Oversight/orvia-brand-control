@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSupabase } from "@/lib/supabase-server";
 import { seoAgent, seoIndustryThemes } from "@/config/seo-agent";
+import { getGscEvidence, gscConfigured } from "@/lib/google-search-console";
 
 function authorised(req:NextRequest){
   const expected=process.env.CRON_SECRET || process.env.SEO_AGENT_SECRET;
@@ -21,10 +22,30 @@ export async function GET(req:NextRequest){
     .in("lifecycle_state",["active","preview"]);
 
   const inventory=sites.data || [];
+  let gscEvidence:any[]=[];
+  let gscError="";
+  if(gscConfigured()){
+    try{gscEvidence=await getGscEvidence(28);}
+    catch(e){gscError=e instanceof Error?e.message:String(e);}
+  }
+  const gscSummary=gscEvidence.length
+    ? gscEvidence.map(s=>({
+        siteUrl:s.siteUrl,
+        range:`${s.startDate} to ${s.endDate}`,
+        clicks:s.clicks,
+        impressions:s.impressions,
+        ctr:s.ctr,
+        position:s.position,
+        topQueries:s.topQueries.slice(0,10),
+        topPages:s.topPages.slice(0,10)
+      }))
+    : [];
+
   const instruction=[
     "Run the governed ORVIA daily SEO and AI-discovery review.",
     `Agent: ${seoAgent.code} — ${seoAgent.name}.`,
     "IRIS remains conductor. Use verified search/analytics evidence only; if Search Console is unavailable, record the gap and continue with technical/on-page checks only.",
+    `Google Search Console evidence: ${gscSummary.length?JSON.stringify(gscSummary):gscError?`ERROR: ${gscError}`:"NOT CONNECTED"}.`,
     `Review these registered sites: ${inventory.map(s=>`${s.display_name} (${s.canonical_domain||s.site_key})`).join(", ") || "No registered sites returned"}.`,
     `Priority industry themes: ${seoIndustryThemes.join("; ")}.`,
     "Identify technical defects, indexing/canonical issues, query/page opportunities, high-impression low-CTR pages, internal-link gaps, content gaps, commercial-intent gaps, structured-data gaps and AI-search/entity clarity issues.",
@@ -54,6 +75,9 @@ export async function GET(req:NextRequest){
     agent:seoAgent.code,
     registeredSites:inventory.length,
     work:insert.data,
-    note:"This queues the governed review. Search performance analysis requires a verified Search Console/analytics connection."
+    gscConnected:gscSummary.length>0,
+    gscSites:gscSummary.length,
+    gscError:gscError||undefined,
+    note:gscSummary.length?"Verified Google Search Console evidence was attached to the IRIS review.":"The review was queued, but live GSC evidence is not yet connected."
   });
 }
